@@ -1,0 +1,15 @@
+version: "3.9" # syntax ver of docker compose
+
+services: 
+  app: # the service that will run the docker file
+    build: # build the docker file inside our current dir
+      context: .
+      args:
+        - DEV=true
+    ports: # maps port 8000 from local machine to port 8000 on docker container
+      - "8000:8000"
+    volumes: # mapping dir from the system to the docker container
+      - ./app:/app
+    command: > # run the service, docker-composr run overrides it
+      sh -c "python manage.py runserver 0.0.0.0:8000"
+ 
