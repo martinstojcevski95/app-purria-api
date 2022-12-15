@@ -10,11 +10,13 @@ services:
       - "8000:8000"
     volumes: # mapping dir from the system to the docker container
       - ./app:/app
-    command: > # run the service, docker-composr run overrides it
-      sh -c "python manage.py runserver 0.0.0.0:8000"
+    command: > # run the service
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
     environment:
       - DB_HOST=db
-      - DB_NAME=devdv
+      - DB_NAME=devdb
       - DB_USER=devuser
       - DB_PASS=devpassword
     depends_on: # app service depends on db service and wait to start first
