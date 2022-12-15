@@ -1,2 +1,2 @@
 # app-purria-api
-Purr API.
+ - Dockerized DRF Api with PostgreSQL
