@@ -14,6 +14,7 @@ CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
 ME_URL = reverse('user:me')
 
+
 def create_user(**params):
     """Create and return new user"""
     return get_user_model().objects.create_user(**params)
@@ -29,7 +30,7 @@ class PublicUserApiTests(TestCase):
         payload = {
             'email': 'test@example.com',
             'password': 'testpass123',
-            'name' : 'Example Name'
+            'name': 'Example Name'
         }
 
         response = self.client.post(CREATE_USER_URL, payload)
@@ -42,9 +43,9 @@ class PublicUserApiTests(TestCase):
     def test_user_with_email_exists_error(self):
         """Test error if user with email already exists."""
         payload = {
-            'email' : 'test@example.com',
-            'password' : 'testpass123',
-            'name' : 'Example Name'
+            'email': 'test@example.com',
+            'password': 'testpass123',
+            'name': 'Example Name'
         }
 
         create_user(**payload)
@@ -55,29 +56,30 @@ class PublicUserApiTests(TestCase):
     def test_password_too_short_error(self):
         """Test error is password is lass then 5 chars."""
         payload = {
-            'email' : 'test@example.com',
-            'password' : '1234',
-            'name' : 'Example Name'
+            'email': 'test@example.com',
+            'password': '1234',
+            'name': 'Example Name'
         }
         response = self.client.post(CREATE_USER_URL, payload)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        user_exists = get_user_model().objects.filter(email=payload['email']).exists()
+        user_exists = get_user_model().objects.filter(
+            email=payload['email']).exists()
         self.assertFalse(user_exists)
 
     def test_create_token_for_user(self):
         """Test generates token for valida credentials."""
         user_details = {
-            'email' : 'test@example.com',
-            'password' : 'test-user-password',
-            'name' : 'Example Name'
+            'email': 'test@example.com',
+            'password': 'test-user-password',
+            'name': 'Example Name'
         }
 
         create_user(**user_details)
 
         payload = {
-            'email' : user_details['email'],
-            'password' : user_details['password'],
+            'email': user_details['email'],
+            'password': user_details['password'],
         }
         response = self.client.post(TOKEN_URL, payload)
 
@@ -95,12 +97,11 @@ class PublicUserApiTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_token_blank_password(self):
-        payload = {'email': 'test@example.com', 'password' : ''}
+        payload = {'email': 'test@example.com', 'password': ''}
         response = self.client.post(TOKEN_URL, payload)
 
         self.assertNotIn('token', response.data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
 
     def test_revrieve_user_unaythorized(self):
         """Test authentication is reqired for users."""
@@ -126,22 +127,23 @@ class PrivateUserApiTests(TestCase):
         response = self.client.get(ME_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data,{
-            'name' : self.user.name,
-            'email' : self.user.email
+        self.assertEqual(response.data, {
+            'name': self.user.name,
+            'email': self.user.email
         })
 
     def test_post_me_not_allowed(self):
         """Test POST request is not allowed for me endpoint."""
         response = self.client.post(ME_URL)
 
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def test_update_user_profile(self):
         """Test updating the user profile for the authenticated user."""
         payload = {
-            'name' : 'Updated name',
-            'password' : 'newpass123'
+            'name': 'Updated name',
+            'password': 'newpass123'
         }
 
         response = self.client.patch(ME_URL, payload)
@@ -150,4 +152,3 @@ class PrivateUserApiTests(TestCase):
         self.assertEqual(self.user.name, payload['name'])
         self.assertTrue(self.user.check_password(payload['password']))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-

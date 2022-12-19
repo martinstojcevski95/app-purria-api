@@ -1,12 +1,16 @@
 """
 Database models.
 """
+from django.conf import settings
+import uuid
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin
 )
+
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class UserManager(BaseUserManager):
@@ -42,3 +46,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+
+class Contract(models.Model):
+    """Contrat object."""
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4,
+                          unique=True, editable=False)
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    level = models.IntegerField(default=1, blank=True, validators=[
+        MinValueValidator(1),
+        MaxValueValidator(3),
+    ])
+
+    def __str__(self):
+        return self.name
