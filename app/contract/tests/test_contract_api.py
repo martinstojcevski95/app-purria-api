@@ -18,9 +18,11 @@ from contract.serializers import (
 
 CONTRACTS_URL = reverse('contract:contract-list')
 
+
 def detail_url(contract_id):
     """Create and return contract detail URL."""
     return reverse('contract:contract-detail', args=[contract_id])
+
 
 def create_contract(user, **params):
     """Create and return simple contract."""
@@ -33,6 +35,7 @@ def create_contract(user, **params):
 
     contract = Contract.objects.create(user=user, **defaults)
     return contract
+
 
 def create_user(**params):
     """Create and return new user."""
@@ -51,12 +54,14 @@ class PublicContractAPITests(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+
 class PrivateContractAPITests(TestCase):
     """Test authenticated API requests."""
 
     def setUp(self):
         self.client = APIClient()
-        self.user = create_user(email='test@example.com', password='testpass123')
+        self.user = create_user(email='test@example.com',
+                                password='testpass123')
         self.client.force_authenticate(self.user)
 
     def test_retrieve_contracts(self):
@@ -75,8 +80,7 @@ class PrivateContractAPITests(TestCase):
     def test_contract_list_limited_to_user(self):
         """Test list of contracts is limited to authenticated user only."""
         other_user = create_user(email='other@example.com',
-            password='password123',
-        )
+                                 password='password123',)
         create_contract(user=other_user)
         create_contract(user=self.user)
 
@@ -126,7 +130,8 @@ class PrivateContractAPITests(TestCase):
         payload = {'name': 'updated contract name'}
         response = self.client.patch(url, payload)
 
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code,
+                         status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertNotEqual(contract.name, payload['name'])
 
     def test_delete_contract(self):
