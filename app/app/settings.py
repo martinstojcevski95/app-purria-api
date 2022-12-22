@@ -25,8 +25,6 @@ SECRET_KEY = 'django-insecure-@l-pba2*7)x&(n4#(3h(amn5)$711lq)rhj&in_uw$lo@6o5pl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -57,6 +55,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'NON_FIELD_ERRORS_KEY': 'errors',
+}
 
 ROOT_URLCONF = 'app.urls'
 
@@ -137,3 +139,5 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'core.User'
+
+ALLOWED_HOSTS = ['*']

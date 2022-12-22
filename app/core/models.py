@@ -60,6 +60,23 @@ class Contract(models.Model):
         MinValueValidator(1),
         MaxValueValidator(3),
     ])
+    gardens = models.ManyToManyField('Garden')
+
+    def __str__(self):
+        return self.name
+
+
+class Garden(models.Model):
+    """Garden for contract."""
+    name = models.CharField(max_length=255)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4,
+                          unique=True, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+    level = models.IntegerField(default=1, blank=True, validators=[
+        MinValueValidator(1),
+        MaxValueValidator(3),
+        ])
 
     def __str__(self):
         return self.name

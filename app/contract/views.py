@@ -1,11 +1,21 @@
 """
 Views for the contract APIs.
 """
-from rest_framework import viewsets
+from rest_framework import (
+    viewsets,
+    mixins,
+)
+
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
 
-from core.models import Contract
+from core.models import (
+    Contract,
+    Garden,
+)
+
 from contract import serializers
 
 
@@ -31,3 +41,31 @@ class ContractViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Create new contract."""
         serializer.save(user=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = serializers.ContractSerializer(queryset, many=True)
+        response = {
+            "result": serializer.data
+        }
+        return Response(data=response, status=status.HTTP_200_OK)
+
+
+class GardenViewSet(mixins.ListModelMixin,
+                    mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin,
+                    viewsets.GenericViewSet):
+    """Manage gardens in the database."""
+    serializer_class = serializers.GardenSerializer
+    queryset = Garden.objects.all()
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = self.queryset.filter(
+            user=self.request.user).order_by('-name')
+        garden_by_contract_name = self.request.query_params.get("name")
+        if garden_by_contract_name is not None:
+            queryset = queryset.filter(
+                name__icontains=garden_by_contract_name).values()
+        return queryset

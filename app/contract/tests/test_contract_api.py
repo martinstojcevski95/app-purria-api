@@ -75,7 +75,7 @@ class PrivateContractAPITests(TestCase):
         serializer = ContractSerializer(contracts, many=True)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.data['result'], serializer.data)
 
     def test_contract_list_limited_to_user(self):
         """Test list of contracts is limited to authenticated user only."""
@@ -88,9 +88,9 @@ class PrivateContractAPITests(TestCase):
 
         contracts = Contract.objects.filter(user=self.user)
         serializer = ContractSerializer(contracts, many=True)
-
+        breakpoint()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.data['result'], serializer.data)
 
     def test_get_contract_detail(self):
         """Test get contract detail."""
@@ -104,23 +104,41 @@ class PrivateContractAPITests(TestCase):
         self.assertEqual(response.data, serializer.data)
         self.assertIn('description', serializer.data)
 
-    def test_create_contract(self):
-        """Test creating contract."""
+    def test_create_contract_with_new_gardens(self):
+        """Test creating contract with new gardens."""
         payload = {
             'name': 'new contract',
             'level': 1,
         }
-        response = self.client.post(CONTRACTS_URL, payload)
 
+        response = self.client.post(CONTRACTS_URL, payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         contract = Contract.objects.get(id=response.data['id'])
+
         for k, v in payload.items():
             self.assertEqual(getattr(contract, k), v)
+
         self.assertEqual(contract.user, self.user)
+        self.assertEqual(contract.level * 10, contract.gardens.count())
+        for garden in contract.gardens.all():
+            self.assertEqual(garden.user, contract.user)
+            self.assertEqual(garden.name, contract.name)
+
+    def test_create_contract_with_same_name_not_allowed(self):
+        """Test creating contract with user and same name not allowed."""
+
+        existing_contract = create_contract(user=self.user)
+
+        serializer = ContractSerializer(existing_contract)
+        response = self.client.post(CONTRACTS_URL, serializer.data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['non_field_errors'][0][:],
+                         'contract with name already exists')
 
     def test_partial_update_not_allowed(self):
-
+        """Test partial update of a contract."""
         contract = create_contract(
             user=self.user,
             name='contract name',
