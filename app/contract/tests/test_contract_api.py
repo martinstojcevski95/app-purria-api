@@ -88,7 +88,7 @@ class PrivateContractAPITests(TestCase):
 
         contracts = Contract.objects.filter(user=self.user)
         serializer = ContractSerializer(contracts, many=True)
-        breakpoint()
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['result'], serializer.data)
 
@@ -134,7 +134,7 @@ class PrivateContractAPITests(TestCase):
         response = self.client.post(CONTRACTS_URL, serializer.data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['non_field_errors'][0][:],
+        self.assertEqual(response.data['errors'][0][:],
                          'contract with name already exists')
 
     def test_partial_update_not_allowed(self):
