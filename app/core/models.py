@@ -69,14 +69,32 @@ class Contract(models.Model):
 class Garden(models.Model):
     """Garden for contract."""
     name = models.CharField(max_length=255)
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4,
-                          unique=True, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE)
     level = models.IntegerField(default=1, blank=True, validators=[
         MinValueValidator(1),
         MaxValueValidator(3),
         ])
+    plants = models.ManyToManyField('Plant')
 
     def __str__(self):
+        return self.name
+
+
+class Plant(models.Model):
+    garden_id = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE, null=True)
+    soil_moisture_percentage = models.FloatField(default=0)
+    fertilizer_per_meter = models.FloatField(default=0)
+    height = models.FloatField(default=0)
+    number_or_stems = models.FloatField(default=0)
+    health = models.FloatField(default=0)
+    has_plant = models.BooleanField(default=True)
+    soil_cohesity = models.FloatField(default=0)
+    disease = models.FloatField(default=0)
+    insects_per_meter = models.FloatField(default=0)
+
+    def __str__(self) -> str:
         return self.name

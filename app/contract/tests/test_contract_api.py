@@ -104,7 +104,7 @@ class PrivateContractAPITests(TestCase):
         self.assertEqual(response.data, serializer.data)
         self.assertIn('description', serializer.data)
 
-    def test_create_contract_with_new_gardens(self):
+    def test_create_contract_with_new_gardens_and_new_plants(self):
         """Test creating contract with new gardens."""
         payload = {
             'name': 'new contract',
@@ -124,6 +124,10 @@ class PrivateContractAPITests(TestCase):
         for garden in contract.gardens.all():
             self.assertEqual(garden.user, contract.user)
             self.assertEqual(garden.name, contract.name)
+            self.assertEqual(garden.plants.count(), garden.level * 10)
+            for plant in garden.plants.all():
+                self.assertEqual(plant.user, garden.user)
+                self.assertEqual(int(plant.garden_id), garden.id)
 
     def test_create_contract_with_same_name_not_allowed(self):
         """Test creating contract with user and same name not allowed."""

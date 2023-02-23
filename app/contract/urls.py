@@ -13,6 +13,7 @@ from contract import views
 router = DefaultRouter()
 router.register('contracts', views.ContractViewSet)
 router.register('gardens', views.GardenViewSet)
+router.register('plants', views.PlantViewSet)
 
 app_name = 'contract'
 

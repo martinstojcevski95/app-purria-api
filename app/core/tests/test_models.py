@@ -78,3 +78,15 @@ class ModelTests(TestCase):
                                               name='garden', level=1)
 
         self.assertEqual(str(garden), garden.name)
+
+    def test_create_plant(self):
+        """Test creating plant is successful."""
+        user = create_user()
+        plant = models.Plant.objects.create(
+            garden_id="123-123-123",
+            user=user,
+            name="plant",
+        )
+
+        self.assertEqual(str(plant), plant.name)
+        self.assertEqual(len(models.Plant.objects.all()), 1)

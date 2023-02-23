@@ -5,15 +5,26 @@ from rest_framework import serializers
 from core.models import (
     Contract,
     Garden,
+    Plant,
 )
+
+
+class PlantSerializer(serializers.ModelSerializer):
+    """Serializer for plants."""
+
+    class Meta:
+        model = Plant
+        fields = ['id', 'garden_id', 'name']
 
 
 class GardenSerializer(serializers.ModelSerializer):
     """Serialier for gardens."""
 
+    plants = PlantSerializer(many=True, required=False)
+
     class Meta:
         model = Garden
-        fields = ['id', 'name', 'level']
+        fields = ['id', 'name', 'level', 'plants']
         read_only_fields = ['id']
 
 
@@ -36,6 +47,14 @@ class ContractSerializer(serializers.ModelSerializer):
             garden = Garden.objects.create(user=auth_user,
                                            name=contract.name,
                                            level=contract.level)
+            for i in range(garden.level * 10):
+                plant = Plant.objects.create(
+                    garden_id=garden.id,
+                    user=garden.user,
+                    name='newplant',
+                )
+                garden.plants.add(plant)
+
             contract.gardens.add(garden)
 
         return contract
@@ -46,7 +65,7 @@ class ContractSerializer(serializers.ModelSerializer):
             current_user_email = self.context['request'].user.email
             check_contract_user = Contract.objects.filter(
                 user__email=current_user_email).filter(
-                    name=attrs['name']).exists()
+                    name=attrs['name'].lower()).exists()
             if check_contract_user:
                 raise serializers.ValidationError(
                     'contract with name already exists')

@@ -14,6 +14,7 @@ from rest_framework import status
 from core.models import (
     Contract,
     Garden,
+    Plant,
 )
 
 from contract import serializers
@@ -52,6 +53,7 @@ class ContractViewSet(viewsets.ModelViewSet):
 
 
 class GardenViewSet(mixins.ListModelMixin,
+                    mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
                     mixins.DestroyModelMixin,
                     viewsets.GenericViewSet):
@@ -69,3 +71,14 @@ class GardenViewSet(mixins.ListModelMixin,
             queryset = queryset.filter(
                 name__icontains=garden_by_contract_name).values()
         return queryset
+
+
+class PlantViewSet(mixins.ListModelMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.UpdateModelMixin,
+                   viewsets.GenericViewSet):
+    """Manage plants in the database."""
+    serializer_class = serializers.PlantSerializer
+    queryset = Plant.objects.all()
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
