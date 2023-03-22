@@ -58,7 +58,7 @@ class ModelTests(TestCase):
         """Test creating a contract is successful."""
         user = get_user_model().objects.create_user(
             'test@example.com',
-            'testpass123',
+            'testingpaass123',
         )
 
         contract = models.Contract.objects.create(
